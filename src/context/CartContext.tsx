@@ -1,4 +1,4 @@
-import { createContext, useContext, useEffect, useMemo, useReducer, type ReactNode } from "react";
+import { createContext, useCallback, useContext, useEffect, useMemo, useReducer, useRef, useState, type ReactNode } from "react";
 import { BOOKS, type Book } from "../data/books";
 
 type Lines = Record<string, number>;
@@ -45,12 +45,23 @@ interface CartValue {
   setQty: (id: string, qty: number) => void;
   remove: (id: string) => void;
   clear: () => void;
+  /** most recent add-to-cart, shown briefly as a toast */
+  toast: { n: number; title: string } | null;
 }
 
 const CartContext = createContext<CartValue | null>(null);
 
 export function CartProvider({ children }: { children: ReactNode }) {
   const [lines, dispatch] = useReducer(reducer, undefined, load);
+  const [toast, setToast] = useState<{ n: number; title: string } | null>(null);
+  const toastTimer = useRef<ReturnType<typeof setTimeout>>(undefined);
+  const flash = useCallback((id: string) => {
+    const title = BOOKS.find((b) => b.id === id)?.title;
+    if (!title) return;
+    setToast((t) => ({ n: (t?.n ?? 0) + 1, title }));
+    clearTimeout(toastTimer.current);
+    toastTimer.current = setTimeout(() => setToast(null), 2200);
+  }, []);
 
   useEffect(() => {
     try {
@@ -68,12 +79,13 @@ export function CartProvider({ children }: { children: ReactNode }) {
       // work in cents to avoid float drift
       total: items.reduce((sum, l) => sum + Math.round(l.book.price * 100) * l.qty, 0) / 100,
       qtyOf: (id) => lines[id] ?? 0,
-      add: (id) => dispatch({ type: "add", id }),
+      add: (id) => { dispatch({ type: "add", id }); flash(id); },
       setQty: (id, qty) => dispatch({ type: "set", id, qty }),
       remove: (id) => dispatch({ type: "remove", id }),
       clear: () => dispatch({ type: "clear" }),
+      toast,
     };
-  }, [lines]);
+  }, [lines, toast, flash]);
 
   return <CartContext.Provider value={value}>{children}</CartContext.Provider>;
 }

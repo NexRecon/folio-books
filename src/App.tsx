@@ -4,7 +4,8 @@ import Hero from "./components/Hero";
 import Catalog from "./components/Catalog";
 import BookDrawer from "./components/BookDrawer";
 import CartDrawer from "./components/CartDrawer";
-import { Footer, Newsletter, Why } from "./components/Sections";
+import Toast from "./components/Toast";
+import { Footer, Marquee, Newsletter, Readers, Why } from "./components/Sections";
 import type { Book } from "./data/books";
 
 export default function App() {
@@ -21,13 +22,16 @@ export default function App() {
       <Header onOpenCart={openCart} />
       <main>
         <Hero onOpen={setSelected} />
+        <Marquee />
         <Catalog onOpen={setSelected} />
         <Why />
+        <Readers />
         <Newsletter />
       </main>
       <Footer />
       <BookDrawer book={selected} onClose={closeBook} onOpenCart={openCart} />
       <CartDrawer open={cartOpen} onClose={closeCart} />
+      <Toast />
     </>
   );
 }

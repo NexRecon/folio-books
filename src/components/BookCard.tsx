@@ -4,6 +4,7 @@ import type { Book } from "../data/books";
 import BookCover from "./BookCover";
 import Rating from "./Rating";
 import { money, useCart } from "../context/CartContext";
+import { spotlight } from "../hooks/fx";
 
 export default function BookCard({ book, onOpen }: { book: Book; onOpen: (b: Book) => void }) {
   const { qtyOf, add } = useCart();
@@ -12,7 +13,8 @@ export default function BookCard({ book, onOpen }: { book: Book; onOpen: (b: Boo
   return (
     <motion.li layout initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, scale: 0.95 }}
       transition={{ duration: 0.3 }}
-      className="group flex flex-col rounded-3xl border border-line bg-surface p-4 transition duration-300 hover:-translate-y-1.5 hover:shadow-2xl hover:shadow-black/10">
+      onPointerMove={spotlight}
+      className="spot group flex flex-col rounded-3xl border border-line bg-surface p-4 transition duration-300 hover:-translate-y-1.5 hover:border-accent/40 hover:shadow-2xl hover:shadow-accent/20">
       <button onClick={() => onOpen(book)} aria-label={`Quick view: ${book.title}`}
         className="rounded-2xl bg-bg px-8 py-6 transition-colors group-hover:bg-line/40">
         <div className="mx-auto w-full max-w-[9.5rem] text-[11px] transition duration-300 group-hover:scale-105 group-hover:-rotate-1">
@@ -28,7 +30,7 @@ export default function BookCard({ book, onOpen }: { book: Book; onOpen: (b: Boo
           <span className="text-lg font-semibold">{money(book.price)}</span>
           <button onClick={() => add(book.id)} aria-label={`${inCart ? "Add another copy of" : "Add"} ${book.title} to cart`}
             className={`inline-flex min-h-11 items-center gap-1.5 rounded-full px-4 text-sm font-semibold transition active:scale-95 ${
-              inCart ? "bg-accent/15 text-accent" : "bg-fg text-bg hover:bg-accent hover:text-on-accent"}`}>
+              inCart ? "bg-accent/15 text-accent" : "bg-accent text-on-accent hover:brightness-110"}`}>
             {inCart ? <Check aria-hidden size={16} /> : <Plus aria-hidden size={16} />}
             {inCart ? `In cart (${qtyOf(book.id)})` : "Add"}
           </button>
